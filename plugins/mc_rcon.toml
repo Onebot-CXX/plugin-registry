@@ -1,0 +1,6 @@
+# 示例：提交插件只需创建这样一个文件
+# 文件名: plugins/<插件名>.toml
+# 内容只需指定 GitHub 仓库地址
+
+[source]
+github = "vollate/obcx-plugin-mc-rcon"

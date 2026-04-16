@@ -1,0 +1,103 @@
+name: Validate Plugin Submission
+
+on:
+  pull_request:
+    paths:
+      - 'plugins/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install tomli
+        run: pip install tomli
+
+      - name: Validate submitted plugins
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 - << 'SCRIPT'
+          import sys, os, json, urllib.request, urllib.error
+          try:
+              import tomllib
+          except ImportError:
+              import tomli as tomllib
+
+          token = os.environ.get("GITHUB_TOKEN", "")
+          errors = []
+
+          # Find changed .toml files in plugins/
+          import subprocess
+          result = subprocess.run(
+              ["git", "diff", "--name-only", "origin/main...HEAD", "--", "plugins/"],
+              capture_output=True, text=True)
+          changed = [f for f in result.stdout.strip().split("\n") if f.endswith(".toml")]
+
+          if not changed:
+              print("No plugin files changed.")
+              sys.exit(0)
+
+          for path in changed:
+              print(f"Validating: {path}")
+              try:
+                  with open(path, "rb") as f:
+                      data = tomllib.load(f)
+              except Exception as e:
+                  errors.append(f"{path}: Invalid TOML: {e}")
+                  continue
+
+              repo = data.get("source", {}).get("github", "")
+              if not repo:
+                  errors.append(f"{path}: Missing source.github field")
+                  continue
+
+              if "/" not in repo or len(repo.split("/")) != 2:
+                  errors.append(f"{path}: Invalid github repo format: '{repo}' (expected 'user/repo')")
+                  continue
+
+              # Check repo exists
+              url = f"https://api.github.com/repos/{repo}"
+              req = urllib.request.Request(url)
+              req.add_header("User-Agent", "obcx-registry-validator")
+              if token:
+                  req.add_header("Authorization", f"token {token}")
+              try:
+                  urllib.request.urlopen(req, timeout=10)
+                  print(f"  Repo exists: {repo}")
+              except urllib.error.HTTPError as e:
+                  errors.append(f"{path}: GitHub repo not found: {repo} (HTTP {e.code})")
+                  continue
+
+              # Check plugin.toml exists in repo
+              for branch in ["main", "master"]:
+                  toml_url = f"https://raw.githubusercontent.com/{repo}/{branch}/plugin.toml"
+                  req2 = urllib.request.Request(toml_url)
+                  req2.add_header("User-Agent", "obcx-registry-validator")
+                  try:
+                      resp = urllib.request.urlopen(req2, timeout=10)
+                      content = resp.read().decode()
+                      meta = tomllib.loads(content)
+                      name = meta.get("plugin", {}).get("name", "")
+                      ver = meta.get("plugin", {}).get("version", "")
+                      abi = meta.get("compatibility", {}).get("obcx_abi_version", "?")
+                      print(f"  plugin.toml OK: name={name} version={ver} abi={abi}")
+                      break
+                  except urllib.error.HTTPError:
+                      continue
+              else:
+                  errors.append(f"{path}: No plugin.toml found in {repo} (checked main/master)")
+
+          if errors:
+              print("\n--- VALIDATION ERRORS ---")
+              for e in errors:
+                  print(f"ERROR: {e}")
+              sys.exit(1)
+          else:
+              print("\nAll validations passed!")
+          SCRIPT

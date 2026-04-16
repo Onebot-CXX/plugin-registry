@@ -1,0 +1,42 @@
+name: Update Plugin Registry
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'plugins/**'
+  # Allow manual trigger
+  workflow_dispatch:
+  # Run daily to pick up new releases from plugin repos
+  schedule:
+    - cron: '17 3 * * *'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install tomli (for Python < 3.11 compat)
+        run: pip install tomli
+
+      - name: Generate index
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/generate_index.py
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          force_orphan: true
