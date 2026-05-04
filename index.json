@@ -1,0 +1,34 @@
+{
+  "registry_version": 1,
+  "updated_at": "2026-05-04T06:20:56.484854+00:00",
+  "plugin_count": 1,
+  "plugins": {
+    "mc_rcon": {
+      "name": "mc_rcon",
+      "description": "Minecraft RCON control plugin for OBCX",
+      "authors": [
+        "vollate"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/vollate/obcx-plugin-mc-rcon",
+      "repository": "https://github.com/vollate/obcx-plugin-mc-rcon",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "tag": "",
+          "obcx_abi_version": 1,
+          "obcx_min_version": "1.1.0",
+          "required_plugins": [],
+          "published_at": "",
+          "source": {
+            "git": "https://github.com/vollate/obcx-plugin-mc-rcon.git",
+            "tag": "HEAD"
+          }
+        }
+      ],
+      "vcpkg_deps": [
+        "tomlplusplus"
+      ]
+    }
+  }
+}

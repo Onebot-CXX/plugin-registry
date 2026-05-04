@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBCX Plugin Registry</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+         background: #0d1117; color: #c9d1d9; padding: 2rem; }
+  h1 { color: #58a6ff; margin-bottom: 0.5rem; }
+  .subtitle { color: #8b949e; margin-bottom: 2rem; }
+  .search { width: 100%; max-width: 400px; padding: 0.5rem 1rem; margin-bottom: 1.5rem;
+             background: #161b22; border: 1px solid #30363d; border-radius: 6px;
+             color: #c9d1d9; font-size: 1rem; }
+  .search:focus { outline: none; border-color: #58a6ff; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 0.75rem; border-bottom: 2px solid #30363d;
+       color: #8b949e; font-size: 0.85rem; text-transform: uppercase; }
+  td { padding: 0.75rem; border-bottom: 1px solid #21262d; }
+  tr:hover { background: #161b22; }
+  a { color: #58a6ff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .api-info { margin-top: 2rem; padding: 1rem; background: #161b22;
+               border-radius: 6px; border: 1px solid #30363d; }
+  .api-info code { background: #0d1117; padding: 0.2rem 0.4rem; border-radius: 3px; }
+  .badge { display: inline-block; padding: 0.15rem 0.5rem; border-radius: 3px;
+            font-size: 0.8rem; font-weight: 500; }
+  .badge-abi { background: #1f6feb33; color: #58a6ff; }
+</style>
+</head>
+<body>
+<h1>OBCX Plugin Registry</h1>
+<p class="subtitle">1 plugin(s) available &middot;
+   Updated 2026-05-04 06:20 UTC</p>
+
+<input type="text" class="search" placeholder="Search plugins..." id="search"
+       oninput="filterTable()">
+
+<table id="plugins-table">
+<thead>
+<tr><th>Name</th><th>Description</th><th>Latest</th><th>ABI</th><th>Authors</th><th>License</th></tr>
+</thead>
+<tbody>
+        <tr>
+            <td><a href="https://github.com/vollate/obcx-plugin-mc-rcon" target="_blank">mc_rcon</a></td>
+            <td>Minecraft RCON control plugin for OBCX</td>
+            <td>1.0.0</td>
+            <td>1</td>
+            <td>vollate</td>
+            <td>MIT</td>
+        </tr>
+</tbody>
+</table>
+
+<div class="api-info">
+  <strong>API Endpoints:</strong><br>
+  All plugins: <code><a href="index.json">index.json</a></code><br>
+  Single plugin: <code>plugins/&lt;name&gt;.json</code><br>
+  CLI: <code>obcx plugin search &lt;query&gt;</code>
+</div>
+
+<script>
+function filterTable() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const rows = document.querySelectorAll('#plugins-table tbody tr');
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>
