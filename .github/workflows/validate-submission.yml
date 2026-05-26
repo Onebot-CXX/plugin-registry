@@ -85,8 +85,7 @@ jobs:
                       meta = tomllib.loads(content)
                       name = meta.get("plugin", {}).get("name", "")
                       ver = meta.get("plugin", {}).get("version", "")
-                      abi = meta.get("compatibility", {}).get("obcx_abi_version", "?")
-                      print(f"  plugin.toml OK: name={name} version={ver} abi={abi}")
+                      print(f"  plugin.toml OK: name={name} version={ver}")
                       break
                   except urllib.error.HTTPError:
                       continue
