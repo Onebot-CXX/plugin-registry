@@ -1,15 +1,13 @@
-name: Update Plugin Registry
+name: Update Actor Registry
 
 on:
   push:
     branches: [main]
     paths:
-      - 'plugins/**'
-  # Allow manual trigger
+      - "actors/**"
+      - "scripts/**"
+      - "tests/**"
   workflow_dispatch:
-  # Run daily to pick up new releases from plugin repos
-  schedule:
-    - cron: '17 3 * * *'
 
 permissions:
   contents: write
@@ -21,19 +19,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-
-      - name: Install tomli (for Python < 3.11 compat)
-        run: pip install tomli
-
-      - name: Generate index
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          python-version: "3.12"
+      - name: Test actor registry
+        run: python3 -m unittest discover -s tests -v
+      - name: Generate actor index
         run: python3 scripts/generate_index.py
-
+      - name: Commit generated index
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(registry): regenerate actor index"
+          file_pattern: "dist/**"
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
