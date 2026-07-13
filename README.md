@@ -5,7 +5,7 @@ The registry publishes canonical ABI-2 OBCX actor packages only.
 To submit an actor, add `actors/<actor-id>.toml` using the same canonical
 `actor.toml` fields as the package repository: identity, semantic version,
 `abi = 2`, supported OBCX range, artifact, dependencies, and publication data.
-There is no plugin entry or compatibility schema.
+No alternate entry or compatibility schema is supported.
 
 Validate entries and regenerate the deterministic index with:
 

@@ -35,7 +35,7 @@ class ActorRegistryTest(unittest.TestCase):
     def test_unknown_metadata_fields_are_rejected(self):
         value = registry.load_actor(ROOT / "actors" / "bridge.toml")
         value = copy.deepcopy(value)
-        value["plugin"] = {"name": "legacy"}
+        value["deprecated"] = True
         with self.assertRaisesRegex(registry.RegistryError, "unknown field"):
             registry.validate_actor(value)
 
