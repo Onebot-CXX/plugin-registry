@@ -3,7 +3,9 @@ name: Validate Actor Submission
 on:
   pull_request:
     paths:
-      - "actors/**"
+      - "entries/**"
+      - "schemas/**"
+      - "generate_actor_index.py"
       - "scripts/**"
       - "tests/**"
 
@@ -18,4 +20,6 @@ jobs:
       - name: Run actor registry tests
         run: python3 -m unittest discover -s tests -v
       - name: Validate and generate actor index
-        run: python3 scripts/generate_index.py --output /tmp/actor-registry
+        run: |
+          python3 generate_actor_index.py validate
+          python3 generate_actor_index.py generate --check

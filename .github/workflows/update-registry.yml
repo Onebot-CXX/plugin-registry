@@ -4,7 +4,9 @@ on:
   push:
     branches: [main]
     paths:
-      - "actors/**"
+      - "entries/**"
+      - "schemas/**"
+      - "generate_actor_index.py"
       - "scripts/**"
       - "tests/**"
   workflow_dispatch:
@@ -25,15 +27,17 @@ jobs:
       - name: Test actor registry
         run: python3 -m unittest discover -s tests -v
       - name: Generate actor index
-        run: python3 scripts/generate_index.py
+        run: |
+          python3 generate_actor_index.py validate
+          python3 generate_actor_index.py generate
       - name: Commit generated index
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore(registry): regenerate actor index"
-          file_pattern: "dist/**"
+          file_pattern: "index/**"
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./index
           force_orphan: true

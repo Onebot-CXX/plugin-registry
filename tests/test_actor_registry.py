@@ -1,73 +1,82 @@
-import copy
+from __future__ import annotations
+
 import importlib.util
 import json
+from pathlib import Path
 import tempfile
 import unittest
-from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-MODULE = ROOT / "scripts" / "generate_index.py"
-SPEC = importlib.util.spec_from_file_location("actor_registry", MODULE)
+GENERATOR = ROOT / "generate_actor_index.py"
+SPEC = importlib.util.spec_from_file_location("actor_registry", GENERATOR)
+if SPEC is None or SPEC.loader is None:
+    raise RuntimeError(f"cannot import {GENERATOR}")
 registry = importlib.util.module_from_spec(SPEC)
-assert SPEC.loader is not None
 SPEC.loader.exec_module(registry)
 
 
 class ActorRegistryTest(unittest.TestCase):
-    def entries(self):
-        return sorted((ROOT / "actors").glob("*.toml"))
-
-    def test_bridge_and_message_store_entries_are_valid(self):
-        index = registry.build_index(self.entries(), "2026-01-01T00:00:00Z")
+    def test_canonical_entries_are_actor_only(self) -> None:
+        index = registry.build_index(ROOT / "entries")
+        self.assertEqual(index["schema_version"], 1)
         self.assertEqual(
-            list(index["actors"]), ["obcx.bridge", "obcx.message-store"]
+            [actor["id"] for actor in index["actors"]],
+            ["onebot-cxx.message-store", "vollate.bridge"],
         )
-        self.assertTrue(all(row["abi"] == 2 for row in index["actors"].values()))
+        for actor in index["actors"]:
+            self.assertEqual(actor["abi"], 2)
+            self.assertEqual(
+                actor["artifact"]["entrypoint"], "obcx_create_actor_v2"
+            )
+            self.assertEqual(actor["artifact"]["platforms"], ["linux-x86_64"])
 
-    def test_unsupported_abi_is_rejected(self):
-        value = registry.load_actor(ROOT / "actors" / "bridge.toml")
-        value = copy.deepcopy(value)
-        value["actor"]["abi"] = 1
-        with self.assertRaisesRegex(registry.RegistryError, "abi must equal 2"):
-            registry.validate_actor(value)
+    def test_invalid_canonical_metadata_is_rejected_by_field(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            entries = Path(temporary) / "entries"
+            actor_dir = entries / "vollate.bridge"
+            actor_dir.mkdir(parents=True)
+            source = ROOT / "entries/vollate.bridge/actor.toml"
+            content = source.read_text(encoding="utf-8").replace(
+                'platforms = ["linux-x86_64"]\n', ""
+            )
+            (actor_dir / "actor.toml").write_text(content, encoding="utf-8")
+            with self.assertRaises(registry.metadata.ActorMetadataError) as error:
+                registry.build_index(entries)
+        self.assertIn("[artifact].platforms must be an array", str(error.exception))
 
-    def test_unknown_metadata_fields_are_rejected(self):
-        value = registry.load_actor(ROOT / "actors" / "bridge.toml")
-        value = copy.deepcopy(value)
-        value["deprecated"] = True
-        with self.assertRaisesRegex(registry.RegistryError, "unknown field"):
-            registry.validate_actor(value)
-
-    def test_generation_is_deterministic(self):
-        first = registry.build_index(self.entries(), "2026-01-01T00:00:00Z")
-        second = registry.build_index(
-            list(reversed(self.entries())), "2026-01-01T00:00:00Z"
-        )
+    def test_generated_index_is_byte_deterministic_and_current(self) -> None:
+        first = registry.encoded_index(registry.build_index(ROOT / "entries"))
+        second = registry.encoded_index(registry.build_index(ROOT / "entries"))
+        self.assertEqual(first, second)
         self.assertEqual(
-            json.dumps(first, sort_keys=True), json.dumps(second, sort_keys=True)
+            first, (ROOT / "index/actors.json").read_text(encoding="utf-8")
         )
 
-    def test_artifact_and_source_resolution_are_explicit(self):
-        record = registry.build_index(
-            self.entries(), "2026-01-01T00:00:00Z"
-        )["actors"]["obcx.bridge"]
-        self.assertEqual(record["source"]["revision"], "v0.1.0")
-        self.assertEqual(
-            record["artifact"]["release_url"],
-            "https://github.com/vollate/obcx-actor-bridge/releases/download/v0.1.0/bridge",
+    def test_only_declared_platform_resolves(self) -> None:
+        index = registry.build_index(ROOT / "entries")
+        result = registry.resolve_artifact(
+            index, "vollate.bridge", "0.1.0", "linux-x86_64"
         )
+        self.assertEqual(result["filename"], "bridge-linux-x86_64.so")
+        with self.assertRaisesRegex(
+            registry.RegistryError, "unsupported artifact platform"
+        ):
+            registry.resolve_artifact(
+                index, "vollate.bridge", "0.1.0", "macos-arm64"
+            )
 
-    def test_writer_replaces_stale_actor_files(self):
-        index = registry.build_index(self.entries(), "2026-01-01T00:00:00Z")
-        with tempfile.TemporaryDirectory() as directory:
-            output = Path(directory)
-            stale = output / "actors" / "stale.json"
-            stale.parent.mkdir(parents=True)
-            stale.write_text("{}", encoding="utf-8")
-            registry.write_index(index, output)
-            self.assertFalse(stale.exists())
-            self.assertTrue((output / "actors" / "obcx.bridge.json").exists())
+    def test_registry_schemas_are_closed(self) -> None:
+        entry = json.loads(
+            (ROOT / "schemas/actor-registry-entry.schema.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        index = json.loads(
+            (ROOT / "schemas/actor-index.schema.json").read_text(encoding="utf-8")
+        )
+        self.assertFalse(entry["additionalProperties"])
+        self.assertEqual(index["properties"]["schema_version"]["const"], 1)
 
 
 if __name__ == "__main__":

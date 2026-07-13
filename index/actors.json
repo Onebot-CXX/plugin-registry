@@ -1,0 +1,93 @@
+{
+  "actors": [
+    {
+      "abi": 2,
+      "artifact": {
+        "entrypoint": "obcx_create_actor_v2",
+        "files": {
+          "linux-x86_64": {
+            "filename": "message_store-linux-x86_64.so",
+            "url": "https://github.com/Onebot-CXX/obcx-actor-message-store/releases/download/v0.1.0/message_store-linux-x86_64.so"
+          }
+        },
+        "install_directory": "lib/obcx/actors",
+        "kind": "shared-library",
+        "name": "message_store",
+        "platforms": [
+          "linux-x86_64"
+        ]
+      },
+      "compatibility": {
+        "actor_abi_max": 2,
+        "actor_abi_min": 2,
+        "obcx": ">=1.1.0,<2.0.0"
+      },
+      "dependencies": {
+        "actors": [],
+        "packages": [
+          "sqlite3"
+        ]
+      },
+      "id": "onebot-cxx.message-store",
+      "metadata": {
+        "path": "entries/onebot-cxx.message-store/actor.toml",
+        "sha256": "77ab18d191a45b5fe6b51328558237c9ede74126745683cff38d59afe91af506"
+      },
+      "name": "message_store",
+      "publication": {
+        "description": "Persistent received-message actor for OBCX pipelines",
+        "homepage": "https://github.com/Onebot-CXX/obcx-actor-message-store",
+        "license": "MIT",
+        "repository": "https://github.com/Onebot-CXX/obcx-actor-message-store"
+      },
+      "version": "0.1.0"
+    },
+    {
+      "abi": 2,
+      "artifact": {
+        "entrypoint": "obcx_create_actor_v2",
+        "files": {
+          "linux-x86_64": {
+            "filename": "bridge-linux-x86_64.so",
+            "url": "https://github.com/vollate/obcx-actor-bridge/releases/download/v0.1.0/bridge-linux-x86_64.so"
+          }
+        },
+        "install_directory": "lib/obcx/actors",
+        "kind": "shared-library",
+        "name": "bridge",
+        "platforms": [
+          "linux-x86_64"
+        ]
+      },
+      "compatibility": {
+        "actor_abi_max": 2,
+        "actor_abi_min": 2,
+        "obcx": ">=1.1.0,<2.0.0"
+      },
+      "dependencies": {
+        "actors": [
+          {
+            "id": "onebot-cxx.message-store",
+            "version": ">=0.1.0,<1.0.0"
+          }
+        ],
+        "packages": [
+          "tomlplusplus"
+        ]
+      },
+      "id": "vollate.bridge",
+      "metadata": {
+        "path": "entries/vollate.bridge/actor.toml",
+        "sha256": "e2bd036288aebf8641d35c33844aaf5996d66918565370b326b2f223829bdff9"
+      },
+      "name": "bridge",
+      "publication": {
+        "description": "QQ and Telegram bidirectional bridge actor for OBCX",
+        "license": "MIT",
+        "repository": "https://github.com/vollate/obcx-actor-bridge"
+      },
+      "version": "0.1.0"
+    }
+  ],
+  "schema_version": 1
+}
