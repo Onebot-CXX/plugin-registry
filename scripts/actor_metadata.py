@@ -26,7 +26,15 @@ SECTION_FIELDS = {
     "actor": {"id", "name", "version", "abi"},
     "artifact": {"name", "target", "kind", "entrypoint", "platforms"},
     "dependencies": {"packages", "actors"},
-    "compatibility": {"obcx", "actor_abi_min", "actor_abi_max"},
+    "compatibility": {
+        "obcx",
+        "actor_abi_min",
+        "actor_abi_max",
+        "cpp_standard",
+        "compiler",
+        "reflection_macro",
+        "input_contract_schema",
+    },
     "publication": {
         "repository",
         "homepage",
@@ -54,10 +62,6 @@ LICENSE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9.+-]*(?:\s+(?:AND|OR)\s+[A-Za-z0
 SUPPORTED_ARTIFACT_PLATFORMS = {
     "linux-x86_64",
     "linux-arm64",
-    "macos-x86_64",
-    "macos-arm64",
-    "windows-x86_64",
-    "windows-arm64",
 }
 
 
@@ -286,6 +290,30 @@ def validate_metadata(document: dict[str, Any]) -> list[str]:
             errors.append(
                 f"[compatibility] ABI range must be {SUPPORTED_ABI}..{SUPPORTED_ABI}"
             )
+    cpp_standard = _required_integer(
+        compatibility, "compatibility", "cpp_standard", errors
+    )
+    if cpp_standard is not None and cpp_standard != 26:
+        errors.append("[compatibility].cpp_standard must equal 26")
+    compiler = _required_string(
+        compatibility, "compatibility", "compiler", errors
+    )
+    if compiler and compiler != "gcc>=16.1":
+        errors.append("[compatibility].compiler must equal 'gcc>=16.1'")
+    reflection_macro = _required_integer(
+        compatibility, "compatibility", "reflection_macro", errors
+    )
+    if reflection_macro is not None and reflection_macro != 202506:
+        errors.append(
+            "[compatibility].reflection_macro must equal 202506"
+        )
+    input_contract_schema = _required_integer(
+        compatibility, "compatibility", "input_contract_schema", errors
+    )
+    if input_contract_schema is not None and input_contract_schema != 1:
+        errors.append(
+            "[compatibility].input_contract_schema must equal 1"
+        )
 
     repository = _required_string(
         publication, "publication", "repository", errors

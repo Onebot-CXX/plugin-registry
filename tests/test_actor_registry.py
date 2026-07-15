@@ -29,7 +29,10 @@ class ActorRegistryTest(unittest.TestCase):
             self.assertEqual(
                 actor["artifact"]["entrypoint"], "obcx_create_actor_v2"
             )
-            self.assertEqual(actor["artifact"]["platforms"], ["linux-x86_64"])
+            self.assertEqual(
+                actor["artifact"]["platforms"],
+                ["linux-x86_64", "linux-arm64"],
+            )
 
     def test_invalid_canonical_metadata_is_rejected_by_field(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -38,7 +41,7 @@ class ActorRegistryTest(unittest.TestCase):
             actor_dir.mkdir(parents=True)
             source = ROOT / "entries/vollate.bridge/actor.toml"
             content = source.read_text(encoding="utf-8").replace(
-                'platforms = ["linux-x86_64"]\n', ""
+                'platforms = ["linux-x86_64", "linux-arm64"]\n', ""
             )
             (actor_dir / "actor.toml").write_text(content, encoding="utf-8")
             with self.assertRaises(registry.metadata.ActorMetadataError) as error:

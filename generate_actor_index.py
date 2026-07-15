@@ -24,10 +24,6 @@ SPEC.loader.exec_module(metadata)
 PLATFORM_SUFFIXES = {
     "linux-x86_64": ".so",
     "linux-arm64": ".so",
-    "macos-x86_64": ".dylib",
-    "macos-arm64": ".dylib",
-    "windows-x86_64": ".dll",
-    "windows-arm64": ".dll",
 }
 
 
