@@ -1,0 +1,26 @@
+{
+  "name": "bridge",
+  "description": "Forward messages between QQ and Telegram platforms, like a switch",
+  "authors": [
+    "Vollate"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/vollate/obcx-plugin-bridge",
+  "repository": "https://github.com/vollate/obcx-plugin-bridge",
+  "versions": [
+    {
+      "version": "0.1.0",
+      "tag": "",
+      "required_plugins": [],
+      "published_at": "",
+      "source": {
+        "git": "https://github.com/vollate/obcx-plugin-bridge.git",
+        "tag": "HEAD"
+      }
+    }
+  ],
+  "vcpkg_deps": [
+    "sqlite3",
+    "tomlplusplus"
+  ]
+}

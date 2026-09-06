@@ -1,0 +1,58 @@
+{
+  "registry_version": 1,
+  "updated_at": "2026-09-06T07:52:11.989099+00:00",
+  "plugin_count": 2,
+  "plugins": {
+    "bridge": {
+      "name": "bridge",
+      "description": "Forward messages between QQ and Telegram platforms, like a switch",
+      "authors": [
+        "Vollate"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/vollate/obcx-plugin-bridge",
+      "repository": "https://github.com/vollate/obcx-plugin-bridge",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "tag": "",
+          "required_plugins": [],
+          "published_at": "",
+          "source": {
+            "git": "https://github.com/vollate/obcx-plugin-bridge.git",
+            "tag": "HEAD"
+          }
+        }
+      ],
+      "vcpkg_deps": [
+        "sqlite3",
+        "tomlplusplus"
+      ]
+    },
+    "mc-rcon": {
+      "name": "mc-rcon",
+      "description": "Minecraft RCON control plugin",
+      "authors": [
+        "Vollate"
+      ],
+      "license": "MIT",
+      "homepage": "https://github.com/vollate/obcx-plugin-mc-rcon",
+      "repository": "https://github.com/vollate/obcx-plugin-mc-rcon",
+      "versions": [
+        {
+          "version": "1.0.0",
+          "tag": "",
+          "required_plugins": [],
+          "published_at": "",
+          "source": {
+            "git": "https://github.com/vollate/obcx-plugin-mc-rcon.git",
+            "tag": "HEAD"
+          }
+        }
+      ],
+      "vcpkg_deps": [
+        "tomlplusplus"
+      ]
+    }
+  }
+}
